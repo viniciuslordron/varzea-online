@@ -1,0 +1,114 @@
+﻿@model IEnumerable<VarzeaOnline.Models.Campeonato>
+
+@{
+    ViewBag.Title = "Campeonatos";
+}
+
+<h2 class="page-title"><i class="bi bi-trophy-fill" style="color: var(--green);"></i> Campeonatos</h2>
+
+<div style="margin-bottom: 2rem;">
+    <a href="@Url.Action("Create")" class="ea-btn ea-btn-green">
+        <i class="bi bi-plus-lg"></i> Novo Campeonato
+    </a>
+</div>
+
+@if (TempData["Erro"] != null)
+{
+    <div class="ea-alert ea-alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> @TempData["Erro"]</div>
+}
+@if (TempData["Sucesso"] != null)
+{
+    <div class="ea-alert ea-alert-success"><i class="bi bi-check-circle-fill"></i> @TempData["Sucesso"]</div>
+}
+
+@if (Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div class="camp-card fade-up">
+            <div class="camp-card-top">
+                <h4>@item.Nome</h4>
+                @if (item.Status == "Pronto para Iniciar")
+                {
+                    <span class="ea-badge ea-badge-green">@item.Status</span>
+                }
+                else if (item.Status == "Em Andamento")
+                {
+                    <span class="ea-badge ea-badge-blue">@item.Status</span>
+                }
+                else if (item.Status == "Finalizado")
+                {
+                    <span class="ea-badge ea-badge-gold">Finalizado</span>
+                }
+                else
+                {
+                    <span class="ea-badge ea-badge-gold">@item.Status</span>
+                }
+            </div>
+
+            <div class="camp-meta">
+                <div class="camp-meta-item">
+                    <i class="bi bi-diagram-3" style="color: var(--green);"></i>
+                    Formato: <strong>@item.TipoCampeonato</strong>
+                </div>
+                <div class="camp-meta-item">
+                    <i class="bi bi-people-fill" style="color: var(--blue);"></i>
+                    Jogadores: <strong>@item.QuantidadeJogadores</strong>
+                </div>
+                @if (item.TotalRodadas > 0)
+                {
+                    <div class="camp-meta-item">
+                        <i class="bi bi-calendar-week" style="color: var(--orange);"></i>
+                        Rodada: <strong>@item.RodadaAtual / @item.TotalRodadas</strong>
+                    </div>
+                }
+                <div class="camp-meta-item">
+                    <i class="bi bi-calendar3" style="color: var(--gold);"></i>
+                    Criado em: <strong>@item.DataCriacao.ToString("dd/MM/yyyy")</strong>
+                </div>
+            </div>
+
+            <div class="camp-actions">
+                @if (item.Status == "Pronto para Iniciar")
+                {
+                    using (Html.BeginForm("IniciarCampeonato", "Campeonato", FormMethod.Post, new { style = "display:inline" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@item.IdCampeonato" />
+    <button type="submit" class="ea-btn ea-btn-green ea-btn-sm" onclick="return confirm('Iniciar o campeonato?')">
+                            <i class="bi bi-play-fill"></i> Iniciar
+                        </button>
+                    }
+                }
+
+                <a href="@Url.Action("Details", new { id = item.IdCampeonato })" class="ea-btn ea-btn-ghost ea-btn-sm">
+                    <i class="bi bi-eye"></i> Detalhes
+                </a>
+
+                @if (item.Status == "Aguardando Jogadores" || item.Status == "Pronto para Iniciar")
+                {
+                    <a href="@Url.Action("AdicionarJogadores", new { id = item.IdCampeonato })" class="ea-btn ea-btn-blue ea-btn-sm">
+                        <i class="bi bi-people-fill"></i> Jogadores
+                    </a>
+                    <a href="@Url.Action("Edit", new { id = item.IdCampeonato })" class="ea-btn ea-btn-gold ea-btn-sm">
+                        <i class="bi bi-pencil-fill"></i> Editar
+                    </a>
+                }
+
+                <a href="@Url.Action("Delete", new { id = item.IdCampeonato })" class="ea-btn ea-btn-red ea-btn-sm">
+                    <i class="bi bi-trash3-fill"></i> Excluir
+                </a>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="empty-state">
+        <i class="bi bi-trophy"></i>
+        <p>Nenhum campeonato criado ainda</p>
+        <a href="@Url.Action("Create")" class="ea-btn ea-btn-green">
+            <i class="bi bi-plus-lg"></i> Criar Primeiro Campeonato
+        </a>
+    </div>
+}

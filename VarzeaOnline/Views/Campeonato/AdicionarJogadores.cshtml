@@ -1,0 +1,145 @@
+﻿@model VarzeaOnline.Models.Campeonato
+
+@{
+    ViewBag.Title = "Adicionar Jogadores";
+}
+
+<h2 class="page-title"><i class="bi bi-people-fill" style="color: var(--green);"></i> @Model.Nome</h2>
+
+<!-- INFO DO CAMPEONATO -->
+<div class="ea-card fade-up">
+    <div class="ea-card-header">
+        <i class="bi bi-info-circle-fill"></i> Status do Campeonato
+    </div>
+    <div class="ea-card-body">
+        <div class="camp-meta">
+            <div class="camp-meta-item">
+                <i class="bi bi-diagram-3" style="color: var(--green);"></i>
+                Formato: <strong>@Model.TipoCampeonato</strong>
+            </div>
+            <div class="camp-meta-item">
+                <i class="bi bi-people-fill" style="color: var(--blue);"></i>
+                Jogadores: <strong>@Model.Jogadores.Count / @Model.QuantidadeJogadores</strong>
+            </div>
+            <div class="camp-meta-item">
+                @if (Model.Status == "Pronto para Iniciar")
+                {
+                    <span class="ea-badge ea-badge-green">@Model.Status</span>
+                }
+                else
+                {
+                    <span class="ea-badge ea-badge-gold">@Model.Status</span>
+                }
+            </div>
+        </div>
+        <div class="ea-progress">
+            @{
+                int pct = Model.QuantidadeJogadores > 0
+                    ? (int)((double)Model.Jogadores.Count / Model.QuantidadeJogadores * 100)
+                    : 0;
+            }
+            <div class="ea-progress-bar" style="width: @(pct)%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTAS -->
+@if (TempData["Erro"] != null)
+{
+    <div class="ea-alert ea-alert-danger fade-up">
+        <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Erro"]
+    </div>
+}
+
+@if (TempData["Sucesso"] != null)
+{
+    <div class="ea-alert ea-alert-success fade-up">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Sucesso"]
+    </div>
+}
+
+<!-- FORMULARIO ADICIONAR JOGADOR -->
+@if (Model.Jogadores.Count < Model.QuantidadeJogadores)
+{
+    <div class="ea-card fade-up">
+        <div class="ea-card-header">
+            <i class="bi bi-person-plus-fill"></i> Jogador @(Model.Jogadores.Count + 1) de @Model.QuantidadeJogadores
+        </div>
+        <div class="ea-card-body">
+            @using (Html.BeginForm("AdicionarJogador", "Campeonato", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdCampeonato" value="@Model.IdCampeonato" />
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="ea-form-group">
+                            <label class="ea-label">Nome do Jogador</label>
+                            <input type="text" name="NomeJogador" class="ea-input" placeholder="Ex: Vinicius, Joao..." required />
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="ea-form-group">
+                            <label class="ea-label">Time</label>
+                            @Html.DropDownList("IdTime", (IEnumerable<SelectListItem>)ViewBag.TimesSelect, "Selecione o time", new { @class = "ea-input ea-select", required = "required" })
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <div class="ea-form-group" style="width: 100%;">
+                            <button type="submit" class="ea-btn ea-btn-green" style="width: 100%; justify-content: center;">
+                                <i class="bi bi-plus-lg"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- LISTA DE JOGADORES -->
+@if (Model.Jogadores.Any())
+{
+    <div class="ea-card fade-up">
+        <div class="ea-card-header">
+            <i class="bi bi-list-ol"></i> Jogadores Cadastrados
+        </div>
+        @{
+            int num = 1;
+        }
+        @foreach (var jogador in Model.Jogadores)
+        {
+            <div class="jogador-item">
+                <div class="jogador-num">@num</div>
+                <div class="jogador-details">
+                    <div class="jogador-name">@jogador.NomeJogador</div>
+                    <div class="jogador-team">
+                        <i class="bi bi-shield-fill" style="color: var(--green); font-size: 0.75rem;"></i>
+                        @(jogador.Time != null ? jogador.Time.Nome : "N/A")
+                    </div>
+                </div>
+                @using (Html.BeginForm("RemoverJogador", "Campeonato", new { id = jogador.IdJogador }, FormMethod.Post, new { style = "display:inline" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="ea-btn ea-btn-red ea-btn-sm" onclick="return confirm('Remover este jogador?')">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                }
+            </div>
+            num++;
+        }
+    </div>
+}
+
+<!-- BOTOES -->
+<div style="margin-top: 1.5rem; margin-bottom: 3rem; display: flex; gap: 12px;">
+    @if (Model.Status == "Pronto para Iniciar")
+    {
+        <a href="@Url.Action("Index")" class="ea-btn ea-btn-green ea-btn-lg">
+            <i class="bi bi-play-fill"></i> Campeonato Pronto
+        </a>
+    }
+    <a href="@Url.Action("Index")" class="ea-btn ea-btn-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>

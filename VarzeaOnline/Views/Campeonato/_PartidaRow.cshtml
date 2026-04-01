@@ -1,0 +1,44 @@
+﻿@model VarzeaOnline.Models.Partida
+
+@{
+    bool isAtual = ViewData["isAtual"] != null && (bool)ViewData["isAtual"];
+}
+
+<div class="match-row">
+    <div class="match-player match-player-home">
+        <span class="match-player-name">@Model.JogadorCasa.NomeJogador</span>
+        <span class="match-player-team">@Model.JogadorCasa.Time.Nome</span>
+    </div>
+
+    <div class="match-score">
+        @if (Model.ResultadoRegistrado)
+        {
+            <span class="match-score-number">@Model.GolsCasa</span>
+            <span class="match-score-x">x</span>
+            <span class="match-score-number">@Model.GolsFora</span>
+        }
+        else if (isAtual)
+        {
+            using (Html.BeginForm("RegistrarResultado", "Campeonato", FormMethod.Post, new { @class = "match-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdPartida" value="@Model.IdPartida" />
+                <input type="number" name="GolsCasa" class="match-input" min="0" value="0" required />
+                <span class="match-score-x">x</span>
+                <input type="number" name="GolsFora" class="match-input" min="0" value="0" required />
+                <button type="submit" class="ea-btn ea-btn-green ea-btn-sm" style="margin-left: 8px;">
+                    <i class="bi bi-check-lg"></i>
+                </button>
+            }
+        }
+        else
+        {
+            <span class="match-score-x" style="color: var(--text-muted);">vs</span>
+        }
+    </div>
+
+    <div class="match-player match-player-away">
+        <span class="match-player-name">@Model.JogadorFora.NomeJogador</span>
+        <span class="match-player-team">@Model.JogadorFora.Time.Nome</span>
+    </div>
+</div>

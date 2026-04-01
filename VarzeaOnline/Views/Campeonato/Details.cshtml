@@ -1,0 +1,338 @@
+﻿@model VarzeaOnline.Models.Campeonato
+
+@{
+    ViewBag.Title = "Detalhes - " + Model.Nome;
+    var partidas = ViewBag.Partidas as List<VarzeaOnline.Models.Partida> ?? new List<VarzeaOnline.Models.Partida>();
+    var classificacao = ViewBag.Classificacao as List<VarzeaOnline.Models.Classificacao> ?? new List<VarzeaOnline.Models.Classificacao>();
+    var rodadas = partidas.GroupBy(p => p.Rodada).OrderBy(g => g.Key).ToList();
+    bool isPontoCorrido = Model.TipoCampeonato == "Pontos Corridos";
+}
+
+<!-- HEADER DO CAMPEONATO -->
+<div class="ea-card fade-up" style="margin-bottom: 2rem;">
+    <div class="ea-card-body" style="padding: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h2 style="margin: 0 0 8px 0; font-size: 2.2rem; border: none; padding: 0;">
+                    @Model.Nome
+                </h2>
+                <div class="camp-meta" style="margin-bottom: 0;">
+                    <div class="camp-meta-item">
+                        <i class="bi bi-diagram-3" style="color: var(--green);"></i>
+                        <strong>@Model.TipoCampeonato</strong>
+                    </div>
+                    <div class="camp-meta-item">
+                        <i class="bi bi-people-fill" style="color: var(--blue);"></i>
+                        <strong>@Model.QuantidadeJogadores jogadores</strong>
+                    </div>
+                    @if (Model.TotalRodadas > 0)
+                    {
+                        <div class="camp-meta-item">
+                            <i class="bi bi-calendar-week" style="color: var(--orange);"></i>
+                            Rodada <strong>@Model.RodadaAtual / @Model.TotalRodadas</strong>
+                        </div>
+                    }
+                    <div class="camp-meta-item">
+                        <i class="bi bi-calendar3" style="color: var(--gold);"></i>
+                        <strong>@Model.DataCriacao.ToString("dd/MM/yyyy")</strong>
+                    </div>
+                </div>
+            </div>
+            <div>
+                @if (Model.Status == "Pronto para Iniciar")
+                {
+                    <span class="ea-badge ea-badge-green" style="font-size: 0.85rem; padding: 8px 20px;">@Model.Status</span>
+                }
+                else if (Model.Status == "Em Andamento")
+                {
+                    <span class="ea-badge ea-badge-blue" style="font-size: 0.85rem; padding: 8px 20px;">@Model.Status</span>
+                }
+                else if (Model.Status == "Finalizado")
+                {
+                    <span class="ea-badge ea-badge-gold" style="font-size: 0.85rem; padding: 8px 20px;">Finalizado</span>
+                }
+                else
+                {
+                    <span class="ea-badge ea-badge-gold" style="font-size: 0.85rem; padding: 8px 20px;">@Model.Status</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTAS -->
+@if (TempData["Erro"] != null)
+{
+    <div class="ea-alert ea-alert-danger"><i class="bi bi-exclamation-triangle-fill"></i> @TempData["Erro"]</div>
+}
+@if (TempData["Sucesso"] != null)
+{
+    <div class="ea-alert ea-alert-success"><i class="bi bi-check-circle-fill"></i> @TempData["Sucesso"]</div>
+}
+
+@if (Model.Status == "Em Andamento" || Model.Status == "Finalizado")
+{
+    if (isPontoCorrido)
+    {
+        <!-- PONTOS CORRIDOS: Classificacao esquerda + Rodadas direita -->
+        <div class="row">
+            <div class="col-md-5">
+                <div class="ea-card fade-up">
+                    <div class="ea-card-header">
+                        <i class="bi bi-trophy-fill"></i> Classificacao
+                    </div>
+                    @if (classificacao.Any())
+                    {
+                        <div style="overflow-x: auto;">
+                            <table class="ea-table" style="font-size: 0.85rem;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px; padding: 10px 8px;">#</th>
+                                        <th style="padding: 10px 8px;">Jogador</th>
+                                        <th style="text-align:center; padding: 10px 6px;">J</th>
+                                        <th style="text-align:center; padding: 10px 6px;">V</th>
+                                        <th style="text-align:center; padding: 10px 6px;">E</th>
+                                        <th style="text-align:center; padding: 10px 6px;">D</th>
+                                        <th style="text-align:center; padding: 10px 6px;">SG</th>
+                                        <th style="text-align:center; padding: 10px 6px; color: var(--gold) !important;">P</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int pos = 1;}
+                                    @foreach (var item in classificacao)
+                                    {
+                                        <tr class="@(pos == 1 ? "classif-first" : pos == classificacao.Count ? "classif-last" : "")">
+                                            <td style="padding: 10px 8px;">
+                                                <span class="classif-pos @(pos == 1 ? "classif-pos-gold" : pos == 2 ? "classif-pos-silver" : pos == 3 ? "classif-pos-bronze" : "")">
+                                                    @pos
+                                                </span>
+                                            </td>
+                                            <td style="padding: 10px 8px;">
+                                                <div style="font-weight: 600;">@item.Jogador.NomeJogador</div>
+                                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                                    <i class="bi bi-shield-fill" style="color: var(--green); font-size: 0.65rem;"></i>
+                                                    @(item.Jogador.Time != null ? item.Jogador.Time.Nome : "")
+                                                </div>
+                                            </td>
+                                            <td style="text-align:center; padding: 10px 6px;">@item.Jogos</td>
+                                            <td style="text-align:center; padding: 10px 6px; color: var(--green);">@item.Vitorias</td>
+                                            <td style="text-align:center; padding: 10px 6px;">@item.Empates</td>
+                                            <td style="text-align:center; padding: 10px 6px; color: var(--red);">@item.Derrotas</td>
+                                            <td style="text-align:center; padding: 10px 6px; color: @(item.SaldoGols > 0 ? "var(--green)" : item.SaldoGols < 0 ? "var(--red)" : "var(--text-secondary)");">
+                                                @(item.SaldoGols > 0 ? "+" : "")@item.SaldoGols
+                                            </td>
+                                            <td style="text-align:center; padding: 10px 6px;">
+                                                <span class="classif-pts" style="font-size: 1.1rem;">@item.Pontos</span>
+                                            </td>
+                                        </tr>
+                                        pos++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ea-card-body" style="text-align: center; color: var(--text-muted);">
+                            Classificacao zerada. Finalize uma rodada para atualizar.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                @foreach (var rodada in rodadas)
+                {
+                    bool isAtual = rodada.Key == Model.RodadaAtual && Model.Status != "Finalizado";
+                    bool todasRegistradas = rodada.All(p => p.ResultadoRegistrado);
+
+                    <div class="ea-card fade-up" style="@(isAtual ? "border-color: rgba(0,230,118,0.3); box-shadow: 0 0 20px rgba(0,230,118,0.1);" : "")">
+                        <div class="ea-card-header">
+                            <i class="bi @(isAtual ? "bi-play-circle-fill" : todasRegistradas ? "bi-check-circle-fill" : "bi-clock-fill")"></i>
+                            Rodada @rodada.Key
+                            @if (isAtual)
+                            {
+                                <span class="ea-badge ea-badge-green" style="margin-left: auto;">Atual</span>
+                            }
+                            else if (rodada.Key < Model.RodadaAtual || Model.Status == "Finalizado")
+                            {
+                                <span class="ea-badge ea-badge-blue" style="margin-left: auto;">Concluida</span>
+                            }
+                        </div>
+
+                        @foreach (var partida in rodada)
+                        {
+                            @Html.Partial("_PartidaRow", partida, new ViewDataDictionary { { "isAtual", isAtual } })
+                        }
+
+                        @if (isAtual && todasRegistradas)
+                        {
+                            <div style="padding: 16px 24px; border-top: 1px solid var(--border);">
+                                @using (Html.BeginForm("FinalizarRodada", "Campeonato", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@Model.IdCampeonato" />
+                                    <button type="submit" class="ea-btn ea-btn-green" onclick="return confirm('Finalizar esta rodada?')">
+                                        <i class="bi bi-check-circle-fill"></i> Finalizar Rodada
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- MATA-MATA: Somente confrontos (largura total) -->
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                @foreach (var rodada in rodadas)
+                {
+                    bool isAtual = rodada.Key == Model.RodadaAtual && Model.Status != "Finalizado";
+                    bool todasRegistradas = rodada.All(p => p.ResultadoRegistrado);
+                    string nomeRodada = rodada.Count() == 1 ? "Final" : rodada.Count() == 2 ? "Semifinal" : "Rodada " + rodada.Key;
+
+                    <div class="ea-card fade-up" style="@(isAtual ? "border-color: rgba(0,230,118,0.3); box-shadow: 0 0 20px rgba(0,230,118,0.1);" : "")">
+                        <div class="ea-card-header">
+                            <i class="bi @(isAtual ? "bi-play-circle-fill" : todasRegistradas ? "bi-check-circle-fill" : "bi-clock-fill")"></i>
+                            @nomeRodada
+                            @if (isAtual)
+                            {
+                                <span class="ea-badge ea-badge-green" style="margin-left: auto;">Atual</span>
+                            }
+                            else if (rodada.Key < Model.RodadaAtual || Model.Status == "Finalizado")
+                            {
+                                <span class="ea-badge ea-badge-blue" style="margin-left: auto;">Concluida</span>
+                            }
+                        </div>
+
+                        @foreach (var partida in rodada)
+                        {
+                            @Html.Partial("_PartidaRow", partida, new ViewDataDictionary { { "isAtual", isAtual } })
+                        }
+
+                        @if (isAtual && todasRegistradas)
+                        {
+                            <div style="padding: 16px 24px; border-top: 1px solid var(--border);">
+                                @using (Html.BeginForm("FinalizarRodada", "Campeonato", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@Model.IdCampeonato" />
+                                    <button type="submit" class="ea-btn ea-btn-green" onclick="return confirm('Finalizar esta rodada?')">
+                                        <i class="bi bi-check-circle-fill"></i> Finalizar Rodada
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+else if (Model.Status == "Aguardando Jogadores" || Model.Status == "Pronto para Iniciar")
+{
+    <div class="ea-card fade-up">
+        <div class="ea-card-header">
+            <i class="bi bi-people-fill"></i> Jogadores (@(Model.Jogadores != null ? Model.Jogadores.Count : 0) / @Model.QuantidadeJogadores)
+        </div>
+        @if (Model.Jogadores != null && Model.Jogadores.Any())
+        {
+            int num = 1;
+            foreach (var jogador in Model.Jogadores)
+            {
+                <div class="jogador-item">
+                    <div class="jogador-num">@num</div>
+                    <div class="jogador-details">
+                        <div class="jogador-name">@jogador.NomeJogador</div>
+                        <div class="jogador-team">
+                            <i class="bi bi-shield-fill" style="color: var(--green); font-size: 0.75rem;"></i>
+                            @(jogador.Time != null ? jogador.Time.Nome : "N/A")
+                        </div>
+                    </div>
+                </div>
+                num++;
+            }
+        }
+        else
+        {
+            <div class="ea-card-body" style="text-align: center; color: var(--text-muted);">
+                Nenhum jogador adicionado ainda.
+            </div>
+        }
+    </div>
+
+    if (Model.Status == "Pronto para Iniciar")
+    {
+        <div style="margin-top: 1rem;">
+            @using (Html.BeginForm("IniciarCampeonato", "Campeonato", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.IdCampeonato" />
+                <button type="submit" class="ea-btn ea-btn-green ea-btn-lg" onclick="return confirm('Iniciar o campeonato?')">
+                    <i class="bi bi-play-fill"></i> Iniciar Campeonato
+                </button>
+            }
+        </div>
+    }
+}
+
+<!-- CAMPEAO (Mata-Mata) -->
+@if (Model.Status == "Finalizado" && !isPontoCorrido && partidas.Any())
+{
+    var ultimaPartida = partidas.OrderByDescending(p => p.Rodada).First();
+    int golsCasa = ultimaPartida.GolsCasa ?? 0;
+    int golsFora = ultimaPartida.GolsFora ?? 0;
+    var campeao = golsCasa >= golsFora ? ultimaPartida.JogadorCasa : ultimaPartida.JogadorFora;
+
+    <div class="ea-card fade-up" style="border-color: rgba(255, 202, 40, 0.4); box-shadow: 0 0 30px rgba(255, 202, 40, 0.15); margin-top: 2rem;">
+        <div class="ea-card-body" style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">&#127942;</div>
+            <h3 style="color: var(--gold); font-size: 1.8rem; margin-bottom: 4px;">CAMPEAO</h3>
+            <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 2px;">
+                @campeao.NomeJogador
+            </div>
+            <div style="color: var(--text-secondary); margin-top: 4px;">
+                <i class="bi bi-shield-fill" style="color: var(--green);"></i>
+                @(campeao.Time != null ? campeao.Time.Nome : "")
+            </div>
+        </div>
+    </div>
+}
+
+<!-- CAMPEAO (Pontos Corridos) -->
+@if (Model.Status == "Finalizado" && isPontoCorrido && classificacao.Any())
+{
+    var campeao = classificacao.First();
+    <div class="ea-card fade-up" style="border-color: rgba(255, 202, 40, 0.4); box-shadow: 0 0 30px rgba(255, 202, 40, 0.15); margin-top: 2rem;">
+        <div class="ea-card-body" style="text-align: center; padding: 40px;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">&#127942;</div>
+            <h3 style="color: var(--gold); font-size: 1.8rem; margin-bottom: 4px;">CAMPEAO</h3>
+            <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 2px;">
+                @campeao.Jogador.NomeJogador
+            </div>
+            <div style="color: var(--text-secondary); margin-top: 4px;">
+                <i class="bi bi-shield-fill" style="color: var(--green);"></i>
+                @(campeao.Jogador.Time != null ? campeao.Jogador.Time.Nome : "")
+            </div>
+            <div style="color: var(--text-muted); margin-top: 12px; font-size: 0.9rem;">
+                @campeao.Pontos pts | @campeao.Vitorias vitorias | @campeao.GolsPro gols
+            </div>
+        </div>
+    </div>
+}
+
+<!-- BOTOES -->
+<div style="margin-top: 2rem; margin-bottom: 3rem; display: flex; gap: 12px;">
+    @if (Model.Status == "Aguardando Jogadores")
+    {
+        <a href="@Url.Action("AdicionarJogadores", new { id = Model.IdCampeonato })" class="ea-btn ea-btn-blue">
+            <i class="bi bi-people-fill"></i> Adicionar Jogadores
+        </a>
+    }
+    <a href="@Url.Action("Index")" class="ea-btn ea-btn-ghost">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
