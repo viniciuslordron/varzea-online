@@ -48,5 +48,5 @@ Com uma interface inspirada no estilo da EA Sports, o sistema permite desde a cr
 
 ### 1. Clonar repositório
 ```bash
-git clone https://github.com/seu-usuario/varzeaonline.git
+git clone https://github.com/viniciuslordron/varzeaonline.git
 cd varzeaonline
