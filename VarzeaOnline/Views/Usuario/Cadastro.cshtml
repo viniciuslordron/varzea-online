@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "Criar Conta";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center" style="margin-top: 60px;">
+    <div class="col-md-5 col-lg-4">
+        <div class="ea-card">
+            <div class="ea-card-header" style="flex-direction: column; text-align: center;">
+                <h4 style="margin: 0;"><i class="bi bi-person-plus-fill me-2"></i>Criar Conta</h4>
+            </div>
+            <div class="ea-card-body">
+
+                @if (ViewBag.Erro != null)
+                {
+                    <div class="ea-alert ea-alert-danger mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Erro
+                    </div>
+                }
+
+                @using (Html.BeginForm("Cadastro", "Usuario", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="ea-label">Nome</label>
+                        <input type="text" name="nome" class="ea-input w-100" placeholder="Seu nome" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="ea-label">Email</label>
+                        <input type="email" name="email" class="ea-input w-100" placeholder="seu@email.com" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="ea-label">Senha</label>
+                        <input type="password" name="senha" class="ea-input w-100" placeholder="Digite sua senha" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="ea-label">Confirmar Senha</label>
+                        <input type="password" name="confirmarSenha" class="ea-input w-100" placeholder="Digite sua senha" required />
+                    </div>
+                    <button type="submit" class="ea-btn ea-btn-green w-100" style="justify-content: center;">
+                        <i class="bi bi-person-check-fill me-2"></i> Criar Conta
+                    </button>
+                }
+
+                <hr style="border-color: rgba(255,255,255,0.08); margin: 24px 0;" />
+
+                <p class="text-center mb-0" style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Já tem uma conta?
+                    <a href="@Url.Action("Login", "Usuario")" style="color: var(--ea-green); text-decoration: none; font-weight: 600;">
+                        Entrar
+                    </a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>

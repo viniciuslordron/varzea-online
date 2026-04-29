@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace VarzeaOnline.Models
@@ -8,16 +8,16 @@ namespace VarzeaOnline.Models
         [Key]
         public int IdUsuario { get; set; }
 
-        [Required(ErrorMessage = "O nome é obrigatório")]
-        [StringLength(100)]
+        [Required(ErrorMessage = "O nome é de preenchimento obrigatório.")]
+        [StringLength(100, MinimumLength = 3)]
         public string Nome { get; set; }
 
-        [Required(ErrorMessage = "O email é obrigatório")]
-        [EmailAddress]
+        [Required(ErrorMessage = "O e-mail é obrigatório.")]
+        [EmailAddress(ErrorMessage = "Digite um e-mail válido.")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "A senha é obrigatória")]
-        [StringLength(100)]
+        [Required(ErrorMessage = "A senha é obrigatória.")]
+        [StringLength(100, MinimumLength = 6)]
         public string Senha { get; set; }
 
         public virtual ICollection<Campeonato> Campeonatos { get; set; }

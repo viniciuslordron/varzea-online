@@ -19,7 +19,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
                         <a class="nav-link" href="@Url.Action("Index", "Home")">
                             <i class="bi bi-house-fill"></i> Inicio
@@ -30,6 +30,32 @@
                             <i class="bi bi-trophy-fill"></i> Campeonatos
                         </a>
                     </li>
+                    @if (Request.IsAuthenticated)
+                    {
+                        <li class="nav-item ms-2">
+                            <span class="nav-link" style="color: var(--ea-green); font-weight: 600;">
+                                <i class="bi bi-person-fill"></i> @User.Identity.Name
+                            </span>
+                        </li>
+                        <li class="nav-item ms-1">
+                            <a class="ea-btn ea-btn-red ea-btn-sm" href="@Url.Action("Logout", "Usuario")">
+                                <i class="bi bi-box-arrow-right"></i> Sair
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item ms-2">
+                            <a class="ea-btn ea-btn-ghost ea-btn-sm" href="@Url.Action("Login", "Usuario")">
+                                <i class="bi bi-box-arrow-in-right"></i> Entrar
+                            </a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a class="ea-btn ea-btn-green ea-btn-sm" href="@Url.Action("Cadastro", "Usuario")">
+                                <i class="bi bi-person-plus-fill"></i> Criar Conta
+                            </a>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>

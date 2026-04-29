@@ -9,6 +9,7 @@ using VarzeaOnline.Models;
 
 namespace VarzeaOnline.Controllers
 {
+    [Authorize]
     public class CampeonatoController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -16,7 +17,14 @@ namespace VarzeaOnline.Controllers
         // GET: Campeonato
         public ActionResult Index()
         {
-            var campeonatos = db.Campeonatos.Include(c => c.Usuario).ToList();
+            if (Session["UsuarioId"] == null)
+                return RedirectToAction("Login", "Usuario");
+
+            int usuarioId = (int)Session["UsuarioId"];
+            var campeonatos = db.Campeonatos
+                .Include(c => c.Usuario)
+                .Where(c => c.IdUsuario == usuarioId)
+                .ToList();
             return View(campeonatos);
         }
 
@@ -72,15 +80,7 @@ namespace VarzeaOnline.Controllers
         {
             if (ModelState.IsValid)
             {
-                var usuario = db.Usuarios.FirstOrDefault();
-                if (usuario == null)
-                {
-                    ModelState.AddModelError("", "Nenhum usuario cadastrado. Cadastre um usuario primeiro.");
-                    CarregarDropdowns();
-                    return View(campeonato);
-                }
-
-                campeonato.IdUsuario = usuario.IdUsuario;
+                campeonato.IdUsuario = (int)Session["UsuarioId"];
                 campeonato.DataCriacao = DateTime.Now;
                 campeonato.Status = "Aguardando Jogadores";
                 campeonato.RodadaAtual = 0;
